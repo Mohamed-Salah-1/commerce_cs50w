@@ -1,0 +1,29 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}Watchlist{% endblock title %}
+
+{% block body %}
+
+    {{ block.super }}
+
+    <h1>My Watchlist</h1>
+    <ul>
+        {% for item in watchlist_items %}
+        
+        <li>
+            <a href="{% url 'listing' item.id %}">{{ item.title }}</a>
+            <!-- Add a form or button to remove the item from the watchlist -->
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" name="remove_from_watchlist" value="{{ item.id }}">
+                    Remove from Watchlist
+                </button>
+            </form>
+        </li>
+
+        {% endfor %}
+    </ul>
+
+
+
+{% endblock body %}

@@ -1,0 +1,67 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {{ block.super }}
+
+    <div class='row mx=3'>
+        {% if user.is_authenticated %}
+            <form method="post">
+                {% csrf_token %}
+                {% if listing in request.user.watchlist.all %}
+                    <button type="submit" class='btn btn-danger' name="Remove_from_Watchlist">Remove From Watchlist</button>
+                {% else %}
+                    <button type="submit" class='btn btn-success' name="add_to_watchlist">Add To Watchlist</button>
+                {% endif %}
+            </form>
+        {% endif %}
+    </div>
+    <br>
+<div class="card" style="width: 18rem;">
+    <h2>{{ listing.title }}</h2><br>
+    <br>
+    <img src="{{ listing.image_url }} " class="card-img-top" alt="{{ listing.title }}"><br>
+    <div class="card-body">
+    <p class="card-text">{{ listing.description }}</p>
+    <p class="card-text">Listed by: {{ listing.created_by }}</p>
+    <p class="card-text">Current Price: ${{ listing.price }}</p>
+    
+<br>
+</div>
+</div>
+
+    <div class='row mx=3'>
+        {% if user.is_authenticated %}
+            <form action="{% url 'listing' listing.id %}" method="post">
+                {% csrf_token %}
+                {{ bid_form.as_p }}
+                <button type="submit" name="bid">Place Bid</button>
+            </form>
+        {% endif %}
+    </div>
+
+{% comment %} ------------ Comment Section ----------------- {% endcomment %}
+    <h2>Comments</h2>
+    {% if user.is_authenticated %}
+        
+        <form method="post" action="{% url 'listing' listing.id %}">
+            {% csrf_token %}
+
+            {{ comment_form.as_p }}
+            <button type="submit" name="comment">Add New Comment</button>
+        </form>
+
+
+    {% endif %}
+    
+    <!-- Display existing comments -->
+    {% if listing.comments.all %}
+        <ul>
+        {% for comment in listing.comments.all %}
+            <li>{{ comment.commenter }}: {{ comment.text }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No comments yet.</p>
+    {% endif %}
+
+{% endblock %}

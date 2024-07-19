@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+{% block title %}Categories{% endblock title %}
+
+{% block body %}
+{% comment %} Keep the nav_bar {% endcomment %}
+{{block.super}} 
+
+<h1>Categories</h1>
+<ul>
+    {% for category in categories %}
+    <li>
+    <a href="{% url 'category_listings' category.id %}">{{ category.name }}</a>
+</li>    
+    {% endfor %}
+
+</ul>
+
+
+
+{% endblock body %}
