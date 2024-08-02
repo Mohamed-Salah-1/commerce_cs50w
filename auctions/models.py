@@ -1,9 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.text import slugify
-
-
-
 class User(AbstractUser):
     pass
 
@@ -20,18 +17,19 @@ class Listing(models.Model):
     isActive = models.BooleanField(default=True)
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="user")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="listings", blank=True, null=True)
-    starting_bid = models.DecimalField(max_digits=10, decimal_places=2, blank=True)
+    starting_bid = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    final_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
     watchlist = models.ManyToManyField(User, blank=True, related_name="watchlist")
    
-
     def __str__(self):
         return self.title
     
 class Comment(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="comments")
-    commenter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="comments")
+    commenter = models.ForeignKey(User, on_delete=models.CASCADE, related_name="commenter")
     text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
 
     def __str__(self):
         return f"Comment by {self.commenter} on {self.listing}"
@@ -45,3 +43,11 @@ class Bid(models.Model):
     def __str__(self):
         return f"{self.amount} by {self.bidder} on {self.listing}"
 
+class Notification(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Notification for {self.user.username}'

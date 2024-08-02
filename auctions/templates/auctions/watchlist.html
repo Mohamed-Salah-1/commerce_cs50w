@@ -3,27 +3,51 @@
 {% block title %}Watchlist{% endblock title %}
 
 {% block body %}
-
     {{ block.super }}
 
-    <h1>My Watchlist</h1>
-    <ul>
-        {% for item in watchlist_items %}
-        
-        <li>
-            <a href="{% url 'listing' item.id %}">{{ item.title }}</a>
-            <!-- Add a form or button to remove the item from the watchlist -->
-            <form method="post">
-                {% csrf_token %}
-                <button type="submit" name="remove_from_watchlist" value="{{ item.id }}">
-                    Remove from Watchlist
-                </button>
-            </form>
-        </li>
-
-        {% endfor %}
-    </ul>
-
-
-
+    <div class="container mt-5">
+        <h1 class="mb-4">My Watchlist</h1>
+        {% if watchlist_items %}
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for item in watchlist_items %}
+                    <div class="col">
+                        <div class="card h-100">
+                            {% if item.image_url %}
+                                <img src="{{ item.image_url }}" class="card-img-top" alt="{{ item.title }}" style="height: 200px; object-fit: cover;">
+                            {% else %}
+                                <div class="card-img-top bg-secondary text-white d-flex justify-content-center align-items-center" style="height: 200px;">
+                                    <span>No Image Available</span>
+                                </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <h5 class="card-title">{{ item.title }}</h5>
+                                <p class="card-text">
+                                    <small class="text-muted">Listed by: {{ item.created_by }}</small><br>
+                                    <small class="text-muted">Date Listed: {{ item.created|date:"M d, Y" }}</small><br>
+                                    {% if item.bids.exists %}
+                                        <small class="text-muted">Highest Bid: ${{ highest_bid }}</small>
+                                    {% else %}
+                                        <small class="text-muted">Starting Bid: ${{ item.starting_bid }}</small>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                <a href="{% url 'listing' item.id %}" class="btn btn-primary btn-sm">View Listing</a>
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" name="remove_from_watchlist" value="{{ item.id }}" class="btn btn-danger btn-sm">
+                                        Remove
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info" role="alert">
+                Your watchlist is empty. Add items to your watchlist to see them here.
+            </div>
+        {% endif %}
+    </div>
 {% endblock body %}

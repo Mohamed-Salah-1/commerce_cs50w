@@ -4,41 +4,20 @@
     {{ block.super }}
     <h2>Active Listings</h2>
     <br>
-    <div style="display: flex;">
-        <div style="flex: 1;">
-            <ul style="list-style: none; padding: 0;">
-                {% for listing in listings %}
-                    <li style="margin-bottom: 20px;">
-                        
-                        {% comment %} <div style="display: flex; align-items: center;"> {% endcomment %}
-                            {% if listing.image_url %}
-                                <img src="{{ listing.image_url }}" alt="{{ listing.title }}" style="max-width: 100px; margin-right: 20px;">
-                            {% endif %}
-                            
-                            <div>
-                                
-                                <a href="{% url 'listing' listing.id %}">{{ listing.title }}</a>
-                                    <small>
-                                        <p>${{ listing.price }}</p>
-                                    </small>
-                                    
-                            </div>
-                            
-                            <div>
-                                {% comment %} <h3 style=>Details</h3> {% endcomment %}
-                                <li >Listed by: {{ listing.created_by }}</li>
-                                <li>Category: {{ listing.category }}</li>
-                                <p>Created: {{ listing.created }}</p>
-                                </div>
-                        </div>
-                    {% comment %} </li> {% endcomment %}
-                        <hr>
-                    
-                    
-                {% endfor %}
-            </ul>
-        </div>
+    <div class="listings-container">
+        {% for listing in listings %}
+            <div class="listing-card">
+                {% if listing.image_url %}
+                    <img src="{{ listing.image_url }}" alt="{{ listing.title }}" class="listing-image">
+                {% endif %}
+                <div class="listing-details">
+                    <a href="{% url 'listing' listing.id %}" class="listing-title">{{ listing.title }}</a>
+                    <p class="listing-price">${{ listing.price }}</p>
+                    <p class="listing-meta">Listed by: {{ listing.created_by }}</p>
+                    <p class="listing-meta">Category: {{ listing.category }}</p>
+                    <p class="listing-meta">Created: {{ listing.created }}</p>
+                </div>
+            </div>
+        {% endfor %}
     </div>
-    
-    
 {% endblock %}

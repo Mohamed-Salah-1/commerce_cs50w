@@ -6,6 +6,8 @@
 <ul>
     {% for listing in listings %}
     <li><a href="{% url 'listing' listing.id %}">{{ listing.title }}</a></li>
+    {% empty %}
+        <li>No categories found.</li>
     {% endfor %}
 </ul>
 {% endblock %}

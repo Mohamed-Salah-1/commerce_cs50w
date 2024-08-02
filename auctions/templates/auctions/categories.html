@@ -10,11 +10,16 @@
     {% for category in categories %}
     <li>
     <a href="{% url 'category_listings' category.id %}">{{ category.name }}</a>
-</li>    
+    {% if category.listing_count == 0 %}
+        (No Listings)
+    {% else %}
+        ({{ category.listing_count }} Listings{{ category.listing_count | pluralize }}) 
+    {% endif %}
+    </li>
+    
+    
     {% endfor %}
 
 </ul>
-
-
 
 {% endblock body %}

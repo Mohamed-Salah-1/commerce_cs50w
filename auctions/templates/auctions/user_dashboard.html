@@ -1,0 +1,22 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+{{ block.super }}
+    <h2>Welcome, {{ user.username }}!</h2>
+
+    {% if notifications %}
+        <div class="alert-container">
+            {% for notification in notifications %}
+                <div class="alert alert-info">
+                    {{ notification.message }}
+                    <a href="{% url 'mark_notification_as_read' notification.id %}" class="btn btn-sm btn-primary">Mark as read</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No new notifications.</p>
+    {% endif %}
+
+    <!-- User's other dashboard content -->
+
+{% endblock %}
