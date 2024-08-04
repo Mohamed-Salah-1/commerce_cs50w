@@ -15,19 +15,17 @@
     {% endif %}
 
     {% comment %} Auction status and actions {% endcomment %}
-    <div class="d-flex justify-content-between align-items-center my-3">
+    <div class="d-flex align-items-center mb-3">
         {% if user.is_authenticated %}
-            {% if listing.isActive %}
-                {% if user == listing.created_by %}
-                <div>
-                    <form action="{% url 'close_auction' listing.id %}" method="POST" class="d-inline">
+            <div class="btn-group me-2">
+                {% if listing.isActive %}
+                    {% if user == listing.created_by %}
+                    <form action="{% url 'close_auction' listing.id %}" method="POST">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-danger">Close Auction</button>
                     </form>
-                </div>
-                {% endif %}
-            {% else %}
-                <div class="col">
+                    {% endif %}
+                {% else %}
                     <div class="alert alert-info">
                         {% if listing.winner %}
                             {{ message }}
@@ -35,18 +33,22 @@
                             {{ messages.warning.0 }}
                         {% endif %}
                     </div>
-                </div>
-            {% endif %}
-    
-            {% comment %} Add to Watch List {% endcomment %}
-            <form method="post" class="d-inline">
-                {% csrf_token %}
-                {% if listing in request.user.watchlist.all %}
-                    <button type="submit" class="btn btn-danger" name="Remove_from_Watchlist">Remove From Watchlist</button>
-                {% else %}
-                    <button type="submit" class="btn btn-success" name="add_to_watchlist">Add To Watchlist</button>
                 {% endif %}
-            </form>
+            </div>
+
+            <div class="btn-group">
+                {% if listing in request.user.watchlist.all %}
+                <form method="post" action="{% url 'remove_from_watchlist' listing.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" name="remove_from_watchlist">Remove From Watchlist</button>
+                </form>
+                {% else %}
+                <form method="post" action="{% url 'add_to_watchlist' listing.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success" name="add_to_watchlist">Add To Watchlist</button>
+                </form>
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 
@@ -92,16 +94,16 @@
     {% comment %} Comment Section {% endcomment %}
     <h3>Comments</h3>
     {% if user.is_authenticated and listing.isActive %}
-<div class="card mb-3">
-    <div class="card-body">
-        <form method="post" action="{% url 'add_comment' listing.id %}">
-            {% csrf_token %}
-            {{ comment_form.as_p }}
-            <button type="submit" class="btn btn-secondary">Add Comment</button>
-        </form>
+    <div class="card mb-3">
+        <div class="card-body">
+            <form method="post" action="{% url 'add_comment' listing.id %}">
+                {% csrf_token %}
+                {{ comment_form.as_p }}
+                <button type="submit" class="btn btn-secondary">Add Comment</button>
+            </form>
+        </div>
     </div>
-</div>
-{% endif %}
+    {% endif %}
 
     {% if listing.comments.all %}
     <div class="card mb-3">
@@ -110,7 +112,6 @@
                 {% for comment in listing.comments.all %}
                 <li class="list-group-item">
                     <strong>{{ comment.commenter }}</strong>: {{ comment.text }} [<small>{{ comment.created_at }}</small>]
-                    
                 </li>
                 {% endfor %}
             </ul>

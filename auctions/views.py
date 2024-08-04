@@ -12,11 +12,17 @@ from .models import User, Listing, Bid, Comment, Category
 
 
 # ------------------------- Index -------------------------------------
+
 def index(request):
-    listings = Listing.objects.filter(isActive=True).order_by("-created")
-    return render(request, "auctions/index.html", {
-        "listings": listings
-    })
+    listings = Listing.objects.all()
+    for listing in listings:
+        highest_bid = Bid.objects.filter(listing=listing).order_by('-amount').first()
+        listing.highest_bid = highest_bid.amount if highest_bid else None
+
+    context = {
+        "listings": listings,
+    }
+    return render(request, "auctions/index.html", context)
 
 # -------------------------Login user----------------------------------------
 def login_view(request):
@@ -39,8 +45,9 @@ def login_view(request):
             })
     else:
         return render(request, "auctions/login.html")
-
-
+    
+    
+# -------------------------LogOut user----------------------------------------
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
@@ -79,6 +86,7 @@ def create_listing(request):
         if form.is_valid():
             listing = form.save(commit=False)
             listing.created_by = request.user
+            listing.price = form.cleaned_data['starting_bid']
             listing.save()
             messages.success(request, "Your listing has been created successfully!")
             return redirect('listing', listing_id=listing.id)
@@ -90,17 +98,21 @@ def create_listing(request):
     return render(request, "auctions/create_listing.html", context)
 
 # -------------------------listing------------------------------------
+@login_required(login_url="login")
 def listing(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id)
     highest_bid = Bid.objects.filter(listing=listing).order_by('-amount').first()
     isOwner = listing.created_by == request.user
+
     if request.method == "POST":
         if "add_to_watchlist" in request.POST:
             user = request.user
             if listing in user.watchlist.all():
                 user.watchlist.remove(listing)
+                messages.success(request, f'Item "{listing.title}" has been removed from your watchlist.')
             else:
                 user.watchlist.add(listing)
+                messages.success(request, f'Item "{listing.title}" has been added to your watchlist.')
             return HttpResponseRedirect(reverse("listing", args=(listing_id,)))
 
     context = {
@@ -112,7 +124,7 @@ def listing(request, listing_id):
     }
     return render(request, "auctions/listing.html", context)
     
-''' add new bid'''
+# -------------------------Add bid------------------------------------
 @login_required
 def add_bid(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id)
@@ -147,6 +159,8 @@ def add_bid(request, listing_id):
     
     return redirect('listing', listing_id=listing_id)
 
+# -------------------------Close auction------------------------------------
+
 @login_required
 def closeAuction(request, listing_id):
     listing = get_object_or_404(Listing, pk=listing_id)
@@ -174,6 +188,7 @@ def closeAuction(request, listing_id):
         messages.error(request, "You don't have permission to close this auction.")
     return redirect('listing', listing_id=listing_id)
 
+# -------------------------Add Comment------------------------------------
 
 @login_required    
 def add_comment(request, listing_id):
@@ -200,7 +215,37 @@ def add_comment(request, listing_id):
         print("Request method is not POST")  # Debugging line
     return redirect('listing', listing_id=listing_id)
 
-        
+# -------------------------Add to watchlist------------------------------------
+
+@login_required
+def add_to_watchlist(request, item_id):
+    item = get_object_or_404(Listing, pk=item_id)
+    user = request.user
+    if item not in user.watchlist.all():
+        user.watchlist.add(item)
+        messages.success(request, f'Item "{item.title}" has been added to your watchlist.')
+    else:
+        messages.info(request, f'Item "{item.title}" is already in your watchlist.')
+    return redirect('listing', listing_id=item_id)
+
+# -------------------------Remove from watchlist------------------------------------
+
+@login_required
+def remove_from_watchlist(request, item_id):
+    if request.method == 'POST':
+        user = request.user
+        item = get_object_or_404(Listing, pk=item_id)
+        if item in user.watchlist.all():
+            user.watchlist.remove(item)  # Remove the item from the user's watchlist
+            messages.success(request, f'Item "{item.title}" has been removed from your watchlist.')
+        else:
+            messages.info(request, f'Item "{item.title}" was not in your watchlist.')
+        return redirect('watchlist')
+    else:
+        return HttpResponseRedirect(reverse('watchlist'))
+
+# ------------------------- watchlist------------------------------------
+
 @login_required
 def watchlist(request):
     user = request.user
