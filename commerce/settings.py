@@ -91,6 +91,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+STATIC_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Update this line to point to your app's static folder
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'auctions', 'static'),
